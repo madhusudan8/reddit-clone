@@ -1,0 +1,232 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER
+// ============================================
+model User {
+  id             String   @id @default(cuid())
+  clerkId        String   @unique
+  username       String   @unique
+  email          String   @unique
+  displayName    String?
+  bio            String?
+  avatarUrl      String?
+  bannerUrl      String?
+  karma          Int      @default(0)
+  isAdmin        Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  posts               Post[]
+  comments            Comment[]
+  votes               Vote[]
+  communityMemberships CommunityMembership[]
+  ownedCommunities    Community[]            @relation("CommunityOwner")
+  savedPosts          SavedPost[]
+  notifications       Notification[]         @relation("NotificationRecipient")
+
+  @@index([clerkId])
+  @@index([username])
+  @@index([email])
+}
+
+// ============================================
+// COMMUNITY (Subreddit)
+// ============================================
+model Community {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  displayName String
+  description String?
+  avatarUrl   String?
+  bannerUrl   String?
+  isPrivate   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Owner
+  ownerId String
+  owner   User   @relation("CommunityOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Relations
+  posts       Post[]
+  memberships CommunityMembership[]
+
+  @@index([name])
+  @@index([ownerId])
+}
+
+// ============================================
+// COMMUNITY MEMBERSHIP
+// ============================================
+enum MemberRole {
+  MEMBER
+  MODERATOR
+  ADMIN
+}
+
+model CommunityMembership {
+  id        String     @id @default(cuid())
+  role      MemberRole @default(MEMBER)
+  joinedAt  DateTime   @default(now())
+
+  userId      String
+  communityId String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, communityId])
+  @@index([userId])
+  @@index([communityId])
+}
+
+// ============================================
+// POST
+// ============================================
+enum PostType {
+  TEXT
+  IMAGE
+  LINK
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String?
+  imageUrl  String?
+  linkUrl   String?
+  type      PostType @default(TEXT)
+  voteScore Int      @default(0)
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  authorId    String
+  communityId String
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  comments  Comment[]
+  votes     Vote[]
+  savedBy   SavedPost[]
+
+  @@index([authorId])
+  @@index([communityId])
+  @@index([voteScore])
+  @@index([createdAt])
+  @@index([communityId, createdAt])
+  @@index([communityId, voteScore])
+}
+
+// ============================================
+// COMMENT
+// ============================================
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  voteScore Int      @default(0)
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  authorId String
+  postId   String
+  parentId String?
+  author   User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post     Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent   Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
+
+  votes Vote[]
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([parentId])
+  @@index([postId, createdAt])
+}
+
+// ============================================
+// VOTE
+// ============================================
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+}
+
+enum VoteTargetType {
+  POST
+  COMMENT
+}
+
+model Vote {
+  id         String         @id @default(cuid())
+  type       VoteType
+  targetType VoteTargetType
+  createdAt  DateTime       @default(now())
+
+  userId    String
+  postId    String?
+  commentId String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId, targetType])
+  @@unique([userId, commentId, targetType])
+  @@index([userId])
+  @@index([postId])
+  @@index([commentId])
+}
+
+// ============================================
+// SAVED POST
+// ============================================
+model SavedPost {
+  id      String   @id @default(cuid())
+  savedAt DateTime @default(now())
+
+  userId String
+  postId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([userId])
+}
+
+// ============================================
+// NOTIFICATION (future-ready)
+// ============================================
+enum NotificationType {
+  COMMENT_REPLY
+  POST_COMMENT
+  POST_UPVOTE
+  COMMUNITY_INVITE
+  MENTION
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  message   String
+  isRead    Boolean          @default(false)
+  metadata  Json?
+  createdAt DateTime         @default(now())
+
+  recipientId String
+  recipient   User   @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId])
+  @@index([recipientId, isRead])
+  @@index([createdAt])
+}
