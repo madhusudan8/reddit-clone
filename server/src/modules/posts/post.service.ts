@@ -46,6 +46,7 @@ export const postService = {
     communityId?: string;
     communityName?: string;
     authorId?: string;
+    userId?: string;
   }) {
     const skip = (options.page - 1) * options.limit;
     return postRepository.list({
@@ -55,6 +56,7 @@ export const postService = {
       communityId: options.communityId,
       communityName: options.communityName,
       authorId: options.authorId,
+      userId: options.userId,
     });
   },
 

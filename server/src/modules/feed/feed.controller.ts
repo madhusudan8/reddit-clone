@@ -29,7 +29,8 @@ export const feedController = {
       const { posts, total } = await feedService.getPopularFeed(
         page,
         limit,
-        sort
+        sort,
+        req.dbUser?.id
       );
       sendSuccess({
         res,
@@ -47,7 +48,8 @@ export const feedController = {
       const { posts, total } = await feedService.getAllFeed(
         page,
         limit,
-        sort
+        sort,
+        req.dbUser?.id
       );
       sendSuccess({
         res,

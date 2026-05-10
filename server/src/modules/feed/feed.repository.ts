@@ -27,7 +27,7 @@ export const feedRepository = {
 
     if (communityIds.length === 0) {
       // Fallback to popular feed if user hasn't joined any communities
-      return this.getPopularFeed(skip, take, sort);
+      return this.getPopularFeed(skip, take, sort, userId);
     }
 
     const where: Prisma.PostWhereInput = {
@@ -40,7 +40,15 @@ export const feedRepository = {
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
         where,
-        include: postIncludes,
+        include: {
+          ...postIncludes,
+          votes: userId
+            ? { where: { userId }, select: { type: true } }
+            : false,
+          savedBy: userId
+            ? { where: { userId }, select: { userId: true } }
+            : false,
+        },
         orderBy,
         skip,
         take,
@@ -57,7 +65,8 @@ export const feedRepository = {
   async getPopularFeed(
     skip: number,
     take: number,
-    sort: "latest" | "top" | "trending"
+    sort: "latest" | "top" | "trending",
+    userId?: string
   ) {
     const where: Prisma.PostWhereInput = {
       isDeleted: false,
@@ -69,7 +78,15 @@ export const feedRepository = {
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
         where,
-        include: postIncludes,
+        include: {
+          ...postIncludes,
+          votes: userId
+            ? { where: { userId }, select: { type: true } }
+            : false,
+          savedBy: userId
+            ? { where: { userId }, select: { userId: true } }
+            : false,
+        },
         orderBy,
         skip,
         take,
@@ -86,7 +103,8 @@ export const feedRepository = {
   async getAllFeed(
     skip: number,
     take: number,
-    sort: "latest" | "top" | "trending"
+    sort: "latest" | "top" | "trending",
+    userId?: string
   ) {
     const where: Prisma.PostWhereInput = {
       isDeleted: false,
@@ -97,7 +115,15 @@ export const feedRepository = {
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
         where,
-        include: postIncludes,
+        include: {
+          ...postIncludes,
+          votes: userId
+            ? { where: { userId }, select: { type: true } }
+            : false,
+          savedBy: userId
+            ? { where: { userId }, select: { userId: true } }
+            : false,
+        },
         orderBy,
         skip,
         take,

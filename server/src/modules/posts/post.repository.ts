@@ -31,6 +31,9 @@ export const postRepository = {
         votes: userId
           ? { where: { userId }, select: { type: true } }
           : false,
+        savedBy: userId
+          ? { where: { userId }, select: { userId: true } }
+          : false,
       },
     });
     return post;
@@ -43,6 +46,7 @@ export const postRepository = {
     communityId?: string;
     communityName?: string;
     authorId?: string;
+    userId?: string;
   }) {
     const where: Prisma.PostWhereInput = {
       isDeleted: false,
@@ -57,7 +61,6 @@ export const postRepository = {
         orderBy = { voteScore: "desc" };
         break;
       case "trending":
-        // Trending = high votes + recent
         orderBy = { voteScore: "desc" };
         break;
       default:
@@ -67,7 +70,15 @@ export const postRepository = {
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
         where,
-        include: postIncludes,
+        include: {
+          ...postIncludes,
+          votes: options.userId
+            ? { where: { userId: options.userId }, select: { type: true } }
+            : false,
+          savedBy: options.userId
+            ? { where: { userId: options.userId }, select: { userId: true } }
+            : false,
+        },
         orderBy,
         skip: options.skip,
         take: options.take,

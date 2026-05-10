@@ -12,6 +12,14 @@ import { createLimiter } from "../../middleware/rate-limiter";
 
 const router = Router();
 
+// GET /api/posts/saved — List saved posts
+router.get(
+  "/saved",
+  requireAuthentication,
+  validate(postQuerySchema, "query"),
+  postController.getSaved
+);
+
 // GET /api/posts — List posts
 router.get(
   "/",

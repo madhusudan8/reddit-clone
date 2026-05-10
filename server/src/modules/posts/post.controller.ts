@@ -35,6 +35,7 @@ export const postController = {
         communityId,
         communityName,
         authorId,
+        userId: req.dbUser?.id,
       });
       sendSuccess({
         res,
@@ -68,6 +69,20 @@ export const postController = {
     try {
       const result = await postService.toggleSave(req.dbUser!.id, req.validated!.params.id as string);
       sendSuccess({ res, data: result, message: result.saved ? "Post saved" : "Post unsaved" });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getSaved(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { page, limit } = req.validated!.query;
+      const { posts, total } = await postService.getSavedPosts(req.dbUser!.id, page, limit);
+      sendSuccess({
+        res,
+        data: posts,
+        pagination: getPaginationMeta(total, page, limit),
+      });
     } catch (error) {
       next(error);
     }

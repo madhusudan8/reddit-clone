@@ -6,13 +6,13 @@ export const feedService = {
     return feedRepository.getHomeFeed(userId, skip, limit, sort);
   },
 
-  async getPopularFeed(page: number, limit: number, sort: "latest" | "top" | "trending") {
+  async getPopularFeed(page: number, limit: number, sort: "latest" | "top" | "trending", userId?: string) {
     const skip = (page - 1) * limit;
-    return feedRepository.getPopularFeed(skip, limit, sort);
+    return feedRepository.getPopularFeed(skip, limit, sort, userId);
   },
 
-  async getAllFeed(page: number, limit: number, sort: "latest" | "top" | "trending") {
+  async getAllFeed(page: number, limit: number, sort: "latest" | "top" | "trending", userId?: string) {
     const skip = (page - 1) * limit;
-    return feedRepository.getAllFeed(skip, limit, sort);
+    return feedRepository.getAllFeed(skip, limit, sort, userId);
   },
 };
