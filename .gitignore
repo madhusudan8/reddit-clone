@@ -1,0 +1,26 @@
+# Root .gitignore for reddit-clone
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Subdirectories
+server/.env
+client/.env.local
+
+# node_modules
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build artifacts
+dist/
+client/.next/
+server/dist/
+
+# Logs
+*.log
