@@ -108,12 +108,15 @@ body {
 }
 
 .shimmer {
-  background: linear-gradient(to right, #e4e4e7 4%, #d4d4d8 25%, #e4e4e7 36%);
+  background-color: #f3f4f6;
+  background-image: linear-gradient(to right, #e5e7eb 8%, #d1d5db 18%, #e5e7eb 33%);
   background-size: 1000px 100%;
   animation: shimmer 2.5s infinite linear;
 }
 
 .dark .shimmer {
-  background: linear-gradient(to right, #1f1f23 4%, #2e2e33 25%, #1f1f23 36%);
+  background-color: #18181b;
+  background-image: linear-gradient(to right, #27272a 8%, #3f3f46 18%, #27272a 33%);
   background-size: 1000px 100%;
 }
+
