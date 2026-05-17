@@ -2,6 +2,7 @@
 
 import PostCard from "@/components/PostCard";
 import PostSkeleton from "@/components/PostSkeleton";
+import ErrorState from "@/components/ErrorState";
 import { useSavedPosts } from "@/hooks/useApi";
 import { Bookmark, Loader2 } from "lucide-react";
 
@@ -12,6 +13,8 @@ export default function SavedPage() {
     hasNextPage,
     isFetchingNextPage,
     status,
+    refetch,
+    isFetching,
   } = useSavedPosts();
 
   return (
@@ -33,9 +36,11 @@ export default function SavedPage() {
             <PostSkeleton />
           </>
         ) : status === "error" ? (
-          <div className="rounded-2xl border border-red-100 bg-red-50 p-4 text-center text-red-600 dark:border-red-900/30 dark:bg-red-900/20 dark:text-red-400">
-            Failed to load saved posts. Please try again later.
-          </div>
+          <ErrorState 
+            title="Failed to load saved posts" 
+            onRetry={() => refetch()} 
+            isRetrying={isFetching} 
+          />
         ) : data.pages[0].posts.length > 0 ? (
           <>
             {data.pages.map((page, i) => (

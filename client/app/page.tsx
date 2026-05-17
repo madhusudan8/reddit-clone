@@ -3,6 +3,7 @@
 import Link from "next/link";
 import PostCard from "@/components/PostCard";
 import PostSkeleton from "@/components/PostSkeleton";
+import ErrorState from "@/components/ErrorState";
 import { Flame, Clock, TrendingUp, Sparkles, Loader2 } from "lucide-react";
 import { useFeed } from "@/hooks/useApi";
 import { useState } from "react";
@@ -25,6 +26,8 @@ export default function Home() {
     hasNextPage,
     isFetchingNextPage,
     status,
+    refetch,
+    isFetching,
   } = useFeed(feedType, sort);
 
   return (
@@ -68,7 +71,11 @@ export default function Home() {
             <PostSkeleton />
           </>
         ) : status === "error" ? (
-          <div className="p-4 text-center text-red-500">Failed to load feed.</div>
+          <ErrorState 
+            title="Failed to load feed" 
+            onRetry={() => refetch()} 
+            isRetrying={isFetching} 
+          />
         ) : (
           data.pages.map((page, i) => (
             <div key={i} className="space-y-3">
@@ -81,6 +88,7 @@ export default function Home() {
           ))
         )}
       </div>
+
 
       {/* Load more */}
       {hasNextPage && (

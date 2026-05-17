@@ -2,6 +2,7 @@
 
 import PostCard from "@/components/PostCard";
 import PostSkeleton from "@/components/PostSkeleton";
+import ErrorState from "@/components/ErrorState";
 import { useCommunity, useCommunityPosts } from "@/hooks/useApi";
 import { formatNumber, formatTimeAgo } from "@/lib/formatters";
 import { Calendar, Shield, Users, Loader2 } from "lucide-react";
@@ -27,7 +28,10 @@ export default function CommunityPage({ params }: CommunityPageProps) {
     hasNextPage,
     isFetchingNextPage,
     status,
+    refetch,
+    isFetching,
   } = useCommunityPosts(community);
+
 
   const joinMutation = useMutation({
     mutationFn: async () => {
@@ -151,7 +155,11 @@ export default function CommunityPage({ params }: CommunityPageProps) {
             <PostSkeleton />
           </>
         ) : status === "error" ? (
-          <div className="p-4 text-center text-red-500">Failed to load posts.</div>
+          <ErrorState 
+            title="Failed to load posts" 
+            onRetry={() => refetch()} 
+            isRetrying={isFetching} 
+          />
         ) : data.pages[0].posts.length > 0 ? (
           <>
             {data.pages.map((page, i) => (
