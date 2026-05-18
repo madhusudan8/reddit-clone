@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create an Axios instance pointing to our backend
 export const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "https://reddit-clone-8rr0.onrender.com/",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
